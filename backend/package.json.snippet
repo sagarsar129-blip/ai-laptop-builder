@@ -1,0 +1,11 @@
+"scripts": {
+  "dev": "node --loader ts-node/esm backend/server.ts",
+  "build": "cd web && npm run build",
+  "start": "node .next/server.js",
+  "web:dev": "cd web && npm run dev",
+  "web:build": "cd web && npm run build",
+  "web:start": "cd web && npm run start",
+  "engine:demo": "node --loader ts-node/esm src/index.ts",
+  "type-check": "tsc --noEmit",
+  "lint": "eslint . --ext .ts,.tsx"
+}

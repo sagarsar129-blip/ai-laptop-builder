@@ -1,19 +1,16 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useDashboardStore } from '@/lib/store';
-import {
-  mockTasks,
-  mockFileOps,
-  mockCommands,
-  mockErrors,
-  mockSandboxStatus,
-  mockWorkspaceFiles,
-} from '@/lib/mockData';
+import { useAIBuilderConnection } from '@/lib/hooks/useAIBuilderConnection';
 import Dashboard from '@/components/Dashboard';
+import { mockTasks, mockFileOps, mockCommands, mockErrors, mockSandboxStatus, mockWorkspaceFiles } from '@/lib/mockData';
+
+const PROJECT_ROOT = process.env.NEXT_PUBLIC_PROJECT_ROOT || './demo-project';
+const USE_MOCK_DATA = process.env.NEXT_PUBLIC_USE_MOCK_DATA === 'true';
 
 export default function Page() {
-  const [mounted, setMounted] = useState(false);
+  const [mounted, setMounted] = React.useState(false);
   const {
     setActiveTask,
     addTask,
@@ -25,37 +22,46 @@ export default function Page() {
     setConnected,
   } = useDashboardStore();
 
+  // Connect to real AIBuilder backend via WebSocket
+  useAIBuilderConnection(PROJECT_ROOT);
+
   useEffect(() => {
-    // Initialize dashboard with mock data
-    setConnected(true);
-    setSandboxStatus(mockSandboxStatus);
-    setWorkspaceFiles(mockWorkspaceFiles);
+    // If mock data is enabled (development), initialize with mock data
+    if (USE_MOCK_DATA) {
+      console.log('📊 Loading mock data for development');
+      setSandboxStatus(mockSandboxStatus);
+      setWorkspaceFiles(mockWorkspaceFiles);
 
-    // Add initial tasks
-    mockTasks.forEach((task) => {
-      addTask(task);
-      if (task.status === 'running') {
-        setActiveTask(task);
-      }
-    });
+      mockTasks.forEach((task) => {
+        addTask(task);
+        if (task.status === 'running') {
+          setActiveTask(task);
+        }
+      });
 
-    // Add file operations
-    mockFileOps.forEach((op) => addFileOp(op));
-
-    // Add commands
-    mockCommands.forEach((cmd) => addCommand(cmd));
-
-    // Add errors
-    mockErrors.forEach((err) => addError(err));
+      mockFileOps.forEach((op) => addFileOp(op));
+      mockCommands.forEach((cmd) => addCommand(cmd));
+      mockErrors.forEach((err) => addError(err));
+    }
 
     setMounted(true);
-  }, [setActiveTask, addTask, addFileOp, addCommand, addError, setSandboxStatus, setWorkspaceFiles, setConnected]);
+  }, [
+    setActiveTask,
+    addTask,
+    addFileOp,
+    addCommand,
+    addError,
+    setSandboxStatus,
+    setWorkspaceFiles,
+    setConnected,
+  ]);
 
   if (!mounted) {
     return (
       <div className="flex items-center justify-center h-screen bg-darker">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Loading Dashboard...</h1>
+        <div className="text-center space-y-4">
+          <h1 className="text-2xl font-bold">🚀 AI Laptop Builder</h1>
+          <p className="text-gray-400">Connecting to secure backend...</p>
           <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
         </div>
       </div>
